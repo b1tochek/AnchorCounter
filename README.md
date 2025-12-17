@@ -1,7 +1,7 @@
 # AnchorCounter
 AnchorCounter A Fabric mod for Minecraft 1.21 that tracks Respawn Anchor placements and explosions for all nearby players.
 
-![Modrinth](https://img.shields.io/modrinth/dt/anchor-counter?style=for-the-badge&logo=modrinth) https://modrinth.com/mod/anchor-counter
+![Modrinth](https://img.shields.io/modrinth/dt/[anchor-counter](https://modrinth.com/mod/anchor-counter)?style=for-the-badge&logo=modrinth)
 
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21-62B47A?style=for-the-badge&logo=minecraft&logoColor=white)
 ![Fabric](https://img.shields.io/badge/Fabric-Loader-B5915C?style=for-the-badge)

@@ -6,10 +6,6 @@ AnchorCounter A Fabric mod for Minecraft 1.21 that tracks Respawn Anchor placeme
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-![GitHub downloads](https://img.shields.io/github/downloads/b1tochek/anchorcounter/total?style=for-the-badge&logo=github)
-![GitHub release](https://img.shields.io/github/v/release/b1tochek/anchorcounter?style=for-the-badge&logo=github)
-![GitHub stars](https://img.shields.io/github/stars/b1tochek/anchorcounter?style=for-the-badge&logo=github)
-
 ## Features
 
 - Track anchor placements and explosions for all players
@@ -48,3 +44,6 @@ All keybindings can be changed in `Options > Controls > AnchorCounter`
 ### Output Example
 
 When you press `-` or type `/showexplodeds`:
+
+
+NOTE: use at own you risk! Check rules of the server before you play with this.

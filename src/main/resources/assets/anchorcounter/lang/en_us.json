@@ -1,0 +1,7 @@
+{
+  "category.anchorcounter.keys": "AnchorCounter",
+  "key.anchorcounter.toggle": "Toggle Display",
+  "key.anchorcounter.reset": "Reset All Stats",
+  "key.anchorcounter.reload": "Reload Config",
+  "key.anchorcounter.showexplodeds": "Show Statistics"
+}

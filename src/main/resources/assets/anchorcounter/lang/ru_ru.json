@@ -1,0 +1,7 @@
+{
+  "category.anchorcounter.keys": "AnchorCounter",
+  "key.anchorcounter.toggle": "Вкл/Выкл отображение",
+  "key.anchorcounter.reset": "Сбросить статистику",
+  "key.anchorcounter.reload": "Перезагрузить конфиг",
+  "key.anchorcounter.showexplodeds": "Показать статистику"
+}

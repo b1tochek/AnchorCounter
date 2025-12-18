@@ -18,7 +18,7 @@ Inspired by TotemCounter by uku3lig
 
 ✅ **Nametag Counter** — Shows anchor count next to player names (like TotemCounter)  
 ✅ **Smart Detection** — Only counts when player actually places an anchor  
-✅ **100 Block Range** — Tracks players within 35 blocks  
+✅ **100 Block Range** — Tracks players within 100 blocks  
 ✅ **Customizable Color** — Change counter color in config  
 ✅ **Commands** — View stats and reset counters  
 ✅ **Keybindings** — Quick access to all functions  

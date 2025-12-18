@@ -16,14 +16,14 @@ AnchorCounter A Fabric mod for Minecraft 1.21 that tracks Respawn Anchor placeme
 Credits
 Inspired by TotemCounter by uku3lig
 
-## Features
-
-- Track anchor placements and explosions for all players
-- Customizable display format
-- HUD overlay with real-time statistics
-- ModMenu integration for easy configuration
-- Keybindings for quick access
-- Client-side only
+✅ **Nametag Counter** — Shows anchor count next to player names (like TotemCounter)  
+✅ **Smart Detection** — Only counts when player actually places an anchor  
+✅ **35 Block Range** — Tracks players within 35 blocks  
+✅ **Customizable Color** — Change counter color in config  
+✅ **Commands** — View stats and reset counters  
+✅ **Keybindings** — Quick access to all functions  
+✅ **ModMenu Support** — Easy GUI configuration  
+✅ **Client-side Only** — Works on any server  
 
 ## Usage
 

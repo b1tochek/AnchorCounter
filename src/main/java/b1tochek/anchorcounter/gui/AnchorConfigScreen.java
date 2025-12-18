@@ -12,12 +12,7 @@ public class AnchorConfigScreen extends Screen {
     private final Screen parent;
     private final AnchorConfig config;
 
-    private TextFieldWidget placedTextField;
-    private TextFieldWidget explodedTextField;
-    private TextFieldWidget formatTextField;
-    private TextFieldWidget symbolTextField;
-    private TextFieldWidget hudXField;
-    private TextFieldWidget hudYField;
+    private TextFieldWidget colorField;
 
     private ButtonWidget enabledButton;
     private ButtonWidget showSelfButton;
@@ -32,9 +27,8 @@ public class AnchorConfigScreen extends Screen {
     @Override
     protected void init() {
         int centerX = this.width / 2;
-        int y = 40;
+        int y = 50;
         int buttonWidth = 200;
-        int fieldWidth = 200;
 
         enabledButton = ButtonWidget.builder(
                         Text.literal("Enabled: " + (config.enabled ? "§aON" : "§cOFF")),
@@ -67,51 +61,13 @@ public class AnchorConfigScreen extends Screen {
                 .dimensions(centerX - buttonWidth/2, y, buttonWidth, 20)
                 .build();
         this.addDrawableChild(showOthersButton);
-        y += 30;
+        y += 35;
 
-        symbolTextField = new TextFieldWidget(this.textRenderer, centerX - fieldWidth/2, y, fieldWidth, 18, Text.literal("Symbol"));
-        symbolTextField.setText(config.anchorSymbol);
-        symbolTextField.setChangedListener(text -> config.anchorSymbol = text);
-        this.addDrawableChild(symbolTextField);
-        y += 22;
-
-        placedTextField = new TextFieldWidget(this.textRenderer, centerX - fieldWidth/2, y, fieldWidth, 18, Text.literal("Placed Text"));
-        placedTextField.setText(config.placedText);
-        placedTextField.setChangedListener(text -> config.placedText = text);
-        this.addDrawableChild(placedTextField);
-        y += 22;
-
-        explodedTextField = new TextFieldWidget(this.textRenderer, centerX - fieldWidth/2, y, fieldWidth, 18, Text.literal("Exploded Text"));
-        explodedTextField.setText(config.explodedText);
-        explodedTextField.setChangedListener(text -> config.explodedText = text);
-        this.addDrawableChild(explodedTextField);
-        y += 22;
-
-        formatTextField = new TextFieldWidget(this.textRenderer, centerX - fieldWidth/2, y, fieldWidth, 18, Text.literal("Format"));
-        formatTextField.setMaxLength(100);
-        formatTextField.setText(config.displayFormat);
-        formatTextField.setChangedListener(text -> config.displayFormat = text);
-        this.addDrawableChild(formatTextField);
-        y += 26;
-
-        hudXField = new TextFieldWidget(this.textRenderer, centerX - fieldWidth/2, y, 95, 18, Text.literal("HUD X"));
-        hudXField.setText(String.valueOf(config.hudX));
-        hudXField.setChangedListener(text -> {
-            try {
-                config.hudX = Integer.parseInt(text);
-            } catch (NumberFormatException ignored) {}
-        });
-        this.addDrawableChild(hudXField);
-
-        hudYField = new TextFieldWidget(this.textRenderer, centerX + 5, y, 95, 18, Text.literal("HUD Y"));
-        hudYField.setText(String.valueOf(config.hudY));
-        hudYField.setChangedListener(text -> {
-            try {
-                config.hudY = Integer.parseInt(text);
-            } catch (NumberFormatException ignored) {}
-        });
-        this.addDrawableChild(hudYField);
-        y += 30;
+        colorField = new TextFieldWidget(this.textRenderer, centerX - 100, y, 200, 20, Text.literal("Color"));
+        colorField.setText(config.nametagColor);
+        colorField.setChangedListener(text -> config.nametagColor = text);
+        this.addDrawableChild(colorField);
+        y += 40;
 
         this.addDrawableChild(ButtonWidget.builder(
                         Text.literal("§aSave & Close"),
@@ -142,10 +98,13 @@ public class AnchorConfigScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context, mouseX, mouseY, delta);
 
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 15, 0xFF55FF);
+        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 20, 0xFF55FF);
 
-        String preview = config.formatDisplay(5, 3);
-        context.drawCenteredTextWithShadow(this.textRenderer, "§7Preview: §f" + preview, this.width / 2, this.height - 30, 0xFFFFFF);
+        context.drawTextWithShadow(this.textRenderer, "Nametag Color (hex):", this.width / 2 - 100, 135, 0xAAAAAA);
+
+        int previewColor = AnchorConfig.parseColor(config.nametagColor);
+        context.drawTextWithShadow(this.textRenderer, "Preview: ", this.width / 2 - 50, this.height - 50, 0xAAAAAA);
+        context.drawTextWithShadow(this.textRenderer, "-5", this.width / 2 + 10, this.height - 50, previewColor);
 
         super.render(context, mouseX, mouseY, delta);
     }

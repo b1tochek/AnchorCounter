@@ -20,26 +20,10 @@ public class AnchorConfig {
     public boolean showSelf = true;
     public boolean showOthers = true;
 
-    public String placedText = "placed";
-    public String explodedText = "exploded";
-    public String anchorSymbol = "⚓";
-
-    public String placedColor = "#55FFFF";
-    public String explodedColor = "#FF5555";
-    public String symbolColor = "#FF55FF";
-    public String textColor = "#FFFFFF";
-    public String numberColor = "#FFFF55";
-
-    public String displayFormat = "{symbol} {placed_text} {placed} | {exploded_text} {exploded}";
-
-    public int hudX = 10;
-    public int hudY = 10;
+    public String nametagColor = "#5500AA";
 
     public double maxRenderDistance = 50.0;
     public int scanRadius = 32;
-
-    public float nametagOffsetY = 0.3f;
-    public float nametagScale = 0.025f;
 
     public static AnchorConfig get() {
         if (INSTANCE == null) {
@@ -78,16 +62,7 @@ public class AnchorConfig {
             String clean = hex.replace("#", "");
             return Integer.parseInt(clean, 16) | 0xFF000000;
         } catch (Exception e) {
-            return 0xFFFFFFFF;
+            return 0xFF5500AA;
         }
-    }
-
-    public String formatDisplay(int placed, int exploded) {
-        return displayFormat
-                .replace("{symbol}", anchorSymbol)
-                .replace("{placed_text}", placedText)
-                .replace("{placed}", String.valueOf(placed))
-                .replace("{exploded_text}", explodedText)
-                .replace("{exploded}", String.valueOf(exploded));
     }
 }

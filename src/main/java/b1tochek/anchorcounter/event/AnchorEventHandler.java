@@ -1,11 +1,9 @@
 package b1tochek.anchorcounter.event;
 
 import b1tochek.anchorcounter.AnchorCounterMod;
-import b1tochek.anchorcounter.config.AnchorConfig;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.RespawnAnchorBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
@@ -14,19 +12,18 @@ import net.minecraft.util.math.BlockPos;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 public class AnchorEventHandler {
 
-    private static final Map<BlockPos, UUID> anchorOwners = new HashMap<>();
-    private static final Set<BlockPos> knownAnchors = new HashSet<>();
+    private static final Set<BlockPos> processedAnchors = new HashSet<>();
     private static final Map<UUID, String> playerNames = new HashMap<>();
-    private static final Map<BlockPos, Integer> anchorCharges = new HashMap<>();
+    private static final Map<UUID, Boolean> wasSwinging = new HashMap<>();
 
-    private static int tickCounter = 0;
+    private static final int VIEW_RADIUS = 100;
+    private static final int SCAN_RADIUS = 8;
 
     public static void register() {
         ClientTickEvents.END_WORLD_TICK.register(world -> {
@@ -35,71 +32,70 @@ public class AnchorEventHandler {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player == null) return;
 
-            tickCounter++;
-
             checkRemovedAnchors(world);
 
-            if (tickCounter % 20 == 0) {
-                scanForAnchorsOptimized(world, client);
-            }
+            scanForAnchors(world, client);
+
+            updateSwingingState(world);
         });
     }
 
-    private static void scanForAnchorsOptimized(ClientWorld world, MinecraftClient client) {
-        int range = AnchorConfig.get().scanRadius;
+    private static void updateSwingingState(ClientWorld world) {
+        for (AbstractClientPlayerEntity player : world.getPlayers()) {
+            wasSwinging.put(player.getUuid(), player.handSwinging);
+        }
+    }
 
-        List<AbstractClientPlayerEntity> players = world.getPlayers();
+    private static void scanForAnchors(ClientWorld world, MinecraftClient client) {
+        for (AbstractClientPlayerEntity player : world.getPlayers()) {
+            double distToPlayer = client.player.getPos().distanceTo(player.getPos());
+            if (distToPlayer > VIEW_RADIUS) continue;
 
-        for (AbstractClientPlayerEntity player : players) {
-            if (player.squaredDistanceTo(client.player) > range * range) continue;
+            boolean isSwinging = player.handSwinging;
+            boolean wasPlayerSwinging = wasSwinging.getOrDefault(player.getUuid(), false);
 
-            BlockPos pPos = player.getBlockPos();
+            if (!isSwinging && !wasPlayerSwinging) continue;
 
-            for (int x = -5; x <= 5; x++) {
-                for (int y = -3; y <= 3; y++) {
-                    for (int z = -5; z <= 5; z++) {
-                        BlockPos checkPos = pPos.add(x, y, z);
-                        checkBlock(world, checkPos, player);
+            BlockPos playerPos = player.getBlockPos();
+
+            for (int x = -SCAN_RADIUS; x <= SCAN_RADIUS; x++) {
+                for (int y = -SCAN_RADIUS; y <= SCAN_RADIUS; y++) {
+                    for (int z = -SCAN_RADIUS; z <= SCAN_RADIUS; z++) {
+                        BlockPos checkPos = playerPos.add(x, y, z);
+
+                        double distToBlock = player.getPos().distanceTo(checkPos.toCenterPos());
+                        if (distToBlock > SCAN_RADIUS) continue;
+
+                        BlockState state = world.getBlockState(checkPos);
+
+                        if (state.isOf(Blocks.RESPAWN_ANCHOR)) {
+                            BlockPos immutablePos = checkPos.toImmutable();
+
+                            if (!processedAnchors.contains(immutablePos)) {
+                                if (distToBlock < 5.0) {
+                                    processedAnchors.add(immutablePos);
+
+                                    UUID ownerUuid = player.getUuid();
+                                    String ownerName = player.getName().getString();
+
+                                    playerNames.put(ownerUuid, ownerName);
+                                    AnchorCounterMod.tracker.onAnchorPlaced(ownerUuid, immutablePos, ownerName);
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    private static void checkBlock(ClientWorld world, BlockPos checkPos, AbstractClientPlayerEntity nearPlayer) {
-        BlockState state = world.getBlockState(checkPos);
-
-        if (state.isOf(Blocks.RESPAWN_ANCHOR)) {
-            BlockPos immutablePos = checkPos.toImmutable();
-            int charges = state.get(RespawnAnchorBlock.CHARGES);
-
-            if (!knownAnchors.contains(immutablePos)) {
-                knownAnchors.add(immutablePos);
-                anchorCharges.put(immutablePos, charges);
-
-                UUID ownerUuid = nearPlayer.getUuid();
-                String ownerName = nearPlayer.getName().getString();
-
-                anchorOwners.put(immutablePos, ownerUuid);
-                playerNames.put(ownerUuid, ownerName);
-
-                AnchorCounterMod.tracker.onAnchorPlaced(ownerUuid, immutablePos, ownerName);
-            } else {
-                anchorCharges.put(immutablePos, charges);
-            }
-        }
-    }
-
     private static void checkRemovedAnchors(ClientWorld world) {
-        if (knownAnchors.isEmpty()) return;
+        if (processedAnchors.isEmpty()) return;
 
-        Iterator<BlockPos> iterator = knownAnchors.iterator();
+        Iterator<BlockPos> iterator = processedAnchors.iterator();
 
-        int checked = 0;
-
-        while (iterator.hasNext() && checked < 10) {
+        while (iterator.hasNext()) {
             BlockPos pos = iterator.next();
-            checked++;
 
             if (!world.isChunkLoaded(pos)) continue;
 
@@ -107,46 +103,13 @@ public class AnchorEventHandler {
 
             if (!state.isOf(Blocks.RESPAWN_ANCHOR)) {
                 iterator.remove();
-                anchorCharges.remove(pos);
-
-                UUID owner = anchorOwners.remove(pos);
-
-                AbstractClientPlayerEntity exploder = findNearestPlayer(world, pos);
-
-                if (exploder != null) {
-                    UUID exploderUuid = exploder.getUuid();
-                    String exploderName = exploder.getName().getString();
-
-                    playerNames.put(exploderUuid, exploderName);
-                    AnchorCounterMod.tracker.onAnchorExploded(exploderUuid, exploderName);
-                } else if (owner != null) {
-                    String ownerName = playerNames.getOrDefault(owner, "Unknown");
-                    AnchorCounterMod.tracker.onAnchorExploded(owner, ownerName);
-                }
             }
         }
-    }
-
-    private static AbstractClientPlayerEntity findNearestPlayer(ClientWorld world, BlockPos pos) {
-        double maxDistance = 8.0;
-        AbstractClientPlayerEntity nearest = null;
-        double nearestDist = Double.MAX_VALUE;
-
-        for (AbstractClientPlayerEntity player : world.getPlayers()) {
-            double dist = player.getPos().squaredDistanceTo(pos.toCenterPos());
-            if (dist < maxDistance * maxDistance && dist < nearestDist) {
-                nearestDist = dist;
-                nearest = player;
-            }
-        }
-
-        return nearest;
     }
 
     public static void reset() {
-        knownAnchors.clear();
-        anchorOwners.clear();
-        anchorCharges.clear();
+        processedAnchors.clear();
+        wasSwinging.clear();
     }
 
     public static String getPlayerName(UUID uuid) {

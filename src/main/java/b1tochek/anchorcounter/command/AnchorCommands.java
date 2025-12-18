@@ -65,7 +65,6 @@ public class AnchorCommands {
     public static void showExplodeds(MinecraftClient client) {
         if (client.player == null || client.world == null) return;
 
-        AnchorConfig config = AnchorConfig.get();
         Map<UUID, AnchorTracker.AnchorData> allData = AnchorCounterMod.tracker.getAllData();
 
         if (allData.isEmpty()) {
@@ -76,7 +75,7 @@ public class AnchorCommands {
         List<Map.Entry<UUID, AnchorTracker.AnchorData>> sorted = allData.entrySet()
                 .stream()
                 .sorted(Comparator.comparingInt((Map.Entry<UUID, AnchorTracker.AnchorData> e) ->
-                        e.getValue().exploded).reversed())
+                        e.getValue().placed).reversed())
                 .toList();
 
         for (Map.Entry<UUID, AnchorTracker.AnchorData> entry : sorted) {
@@ -87,11 +86,7 @@ public class AnchorCommands {
 
             MutableText line = Text.literal(playerName).formatted(Formatting.YELLOW, Formatting.BOLD)
                     .append(Text.literal(" ").formatted(Formatting.RESET))
-                    .append(Text.literal(config.placedText.toUpperCase()).formatted(Formatting.DARK_GREEN, Formatting.BOLD))
-                    .append(Text.literal(" " + data.placed).formatted(Formatting.GREEN, Formatting.BOLD))
-                    .append(Text.literal("; ").formatted(Formatting.GRAY))
-                    .append(Text.literal(config.explodedText.toUpperCase()).formatted(Formatting.DARK_RED, Formatting.BOLD))
-                    .append(Text.literal(" " + data.exploded).formatted(Formatting.RED, Formatting.BOLD));
+                    .append(Text.literal("-" + data.placed).formatted(Formatting.DARK_PURPLE, Formatting.BOLD));
 
             client.player.sendMessage(line, false);
         }
